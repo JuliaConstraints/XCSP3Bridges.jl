@@ -1,0 +1,25 @@
+name = "XCSP3Bridges"
+uuid = "2c268c00-805a-4bbc-9664-dd5edd963493"
+version = "0.1.0"
+
+[deps]
+ConstraintProgrammingExtensions = "b65d079e-ed98-51d9-b0db-edee61a5c5f8"
+MathOptInterface = "b8f27783-ece8-5eb3-8dc8-9495eed66fee"
+QUBOConstraints = "110b7fcc-6942-4061-a625-86e03d1de7cf"
+SHA = "ea8e919c-243c-51af-8825-aaa63cd721ce"
+TOML = "fa267f1f-6049-4f14-aa54-33bafae1ed76"
+
+[compat]
+ConstraintProgrammingExtensions = "0.8"
+MathOptInterface = "1"
+QUBOConstraints = "0.2.2"
+SHA = "0.7, 1"
+TOML = "1"
+julia = "1.12"
+
+[extras]
+HiGHS = "87dc4568-4c63-4d18-b0c0-bb2238e4078b"
+Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+
+[targets]
+test = ["HiGHS", "Test"]
