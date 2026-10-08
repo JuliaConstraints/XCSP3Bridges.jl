@@ -116,8 +116,9 @@ function bridge_payload(bridge)
                 s = MOI.get(bridge.linear, MOI.ConstraintSet(), c)
                 coefficients = Dict{Int,BigInt}()
                 for term in f.terms
-                    coefficients[term.variable.value] = get(coefficients, term.variable.value, big(0)) +
-                        BigInt(term.coefficient)
+                    index = term.variable.value
+                    value = BigInt(term.coefficient)
+                    coefficients[index] = haskey(coefficients, index) ? coefficients[index] + value : value
                 end
                 terms = [Dict("variable"=>i, "coefficient"=>string(coefficients[i]))
                     for i in sort!(collect(keys(coefficients))) if !iszero(coefficients[i])]

@@ -209,6 +209,25 @@ end
         @test_throws ErrorException XB.bridge_payload(as_bridge(unsupported))
     end
 
+    @testset "Exact owned primitive coefficient reduction" begin
+        for leading in (0.0, -2.0, 2.0, -2.0^53, 2.0^53)
+            linear=MOI.Utilities.Model{Float64}();v=MOI.add_variables(linear,3)
+            terms=[MOI.ScalarAffineTerm(leading,v[2]),MOI.ScalarAffineTerm(0.0,v[1]),
+                MOI.ScalarAffineTerm(-3.0,v[3]),MOI.ScalarAffineTerm(-leading,v[2]),
+                MOI.ScalarAffineTerm(5.0,v[1]),MOI.ScalarAffineTerm(-2.0,v[3])]
+            MOI.add_constraint(linear,MOI.ScalarAffineFunction(terms,0.0),MOI.EqualTo(7.0))
+            bridge=(;linear,sources=[1,2],root=3,domain_relations=0,operation_relations=0)
+            payload=XB.bridge_payload(bridge)
+            @test only(payload["equalities"])["terms"]==[
+                Dict("variable"=>1,"coefficient"=>"5"),Dict("variable"=>3,"coefficient"=>"-5")]
+            @test only(payload["equalities"])["rhs"]=="7"
+            # Mutating the caller's term buffer cannot change a payload that
+            # already owns its exact reduced coefficients as decimal strings.
+            terms[1]=MOI.ScalarAffineTerm(99.0,v[2])
+            @test only(payload["equalities"])["terms"][2]["coefficient"]=="-5"
+        end
+    end
+
     @testset "Small learner and failure classification" begin
         s = XB.NetworkSpace([0:1]; slots=1, operators=(:not, :and), constants=0:1)
         result = XB.train(s, [[0], [1]], Bool[true, false]; max_candidates=9)
