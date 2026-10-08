@@ -1,0 +1,25 @@
+root = ".."
+schema_version = "perfchecker-scenario-catalog/1"
+
+[[scenarios]]
+collectors = ["benchmark", "chairmark", "profile", "profile_alloc"]
+factory = "milp_construction_case"
+id = "milp_width_8"
+implementation = "typed-handles-owned-domains-v1"
+repeatable = true
+requirements = ["XCSP3Bridges", "MathOptInterface"]
+source = "scenarios.jl"
+
+    [scenarios.parameters]
+    width = 8
+[[scenarios]]
+collectors = ["benchmark", "chairmark", "profile", "profile_alloc"]
+factory = "milp_construction_case"
+id = "milp_width_16"
+implementation = "typed-handles-owned-domains-v1"
+repeatable = true
+requirements = ["XCSP3Bridges", "MathOptInterface"]
+source = "scenarios.jl"
+
+    [scenarios.parameters]
+    width = 16

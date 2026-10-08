@@ -129,12 +129,27 @@ end
         emitted = XB.add_program!(model, XB.decode_network(s, weights), [x, x])
         @test length(emitted.auxiliaries) == 1
         @test emitted.sources == [x.value, x.value]
+        @test all(c -> MOI.is_valid(model, c), emitted.constraints)
+        again = XB.add_program!(model, XB.decode_network(s, weights), [x, x])
+        @test again.constraints !== emitted.constraints
+        @test again.sources !== emitted.sources
+        @test again.auxiliaries !== emitted.auxiliaries
         compilation = (; linear, emitted.sources, emitted.root, emitted.domain_relations, emitted.operation_relations)
         projected_check(compilation, [[0, 0], [2, 2]], [true, true])
         for value in (0, 1)
             constant = XB.NetworkSpace([]; slots=1, operators=(:constant,), constants=0:1)
             projected_check(XB.compile_milp(constant, BigInt[1, 0, 0, 0, value, 1]), [Int[]], [value == 1])
         end
+        huge = XB.NetworkSpace([[big(2)^53 + 1]]; slots=1, operators=(:eq,), constants=0:1)
+        huge_program = XB.decode_network(huge, BigInt[2, 1, 1, 0, 0, 2])
+        before = MOI.get(model, MOI.NumberOfVariables())
+        @test_throws ArgumentError XB.add_program!(model, huge_program, [x])
+        @test MOI.get(model, MOI.NumberOfVariables()) == before
+        # A changed source domain is revalidated before any model modification.
+        broken = XB.decode_network(s, weights)
+        broken.plan.nodes[1].domain[1] = big(99)
+        @test_throws ArgumentError XB.add_program!(model, broken, [x, x])
+        @test MOI.get(model, MOI.NumberOfVariables()) == before
     end
 
     @testset "Small learner and failure classification" begin

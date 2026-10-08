@@ -1,0 +1,517 @@
+baseline_commit = "ad6cc7c25799eecebad95bb02f57392361db0c5c"
+benchmarktools = "1.7.0"
+blas_threads = 1
+chairmarks = "1.3.1"
+changes = ["Keep graph constraint handles in a concrete union vector.", "Perform exact Float64 domain conversion once after the unchanged atomic-plan validator and before modifying the caller model.", "Reuse checked converted values while each local relation table still owns its rows."]
+cpu_affinity = [12, 14]
+gc_threads = 1
+julia = "1.13.1"
+julia_threads = 2
+mathoptinterface = "1.54.0"
+native_solver_threads = 1
+perfchecker = "1.0.0"
+precompile_tasks = 1
+profile_semantics = "CPU samples and allocation events are separate. Allocation byte/count totals are independent operation measurements; sampled stacks are not used to infer those totals."
+qualification = "Operation and preparation scopes are explicit. All observations use owned state and independent oracles. Concurrent overnight tasks were active; timings are operational comparisons, not controlled scaling. Allocation counts describe Julia-managed operation allocations; native solver and whole-process memory are separate."
+recorded_utc = "2026-10-08T20:46:17.381"
+remaining_hotspots = ["The unchanged exact atomic-plan validator dominates retained construction allocations; validation must remain authoritative.", "JET reports 218 findings and AllocCheck 305 potential sites for complete bridge construction, including dynamic MOI bridge selection, generic error paths and intentional owned model/table allocations.", "Width-16 allocation reduction is about 13% of bytes and 19% of objects against the same optimized CPE dependency. Timings are mixed; no general speedup is claimed."]
+schema = "qualified-performance-increment/1"
+unavailable = ["Linux perf counters denied by perf_event_paranoid=4; kernel policy unchanged."]
+
+[[analyzers]]
+analysis_scope = ""
+artifacts = []
+correctness = "not_checked"
+direct_target_locations = 0
+finding_count = 1
+quality = "failed"
+scenario = "package"
+scope = "Captured before the HiGHS/Test bounds repair; a later default Aqua.test_all passed."
+status = "complete"
+summary = ""
+tool = "aqua"
+tool_version = "0.8.18"
+
+    [analyzers.measurements]
+
+    [[analyzers.representative_findings]]
+    message = "Some tests did not pass: 3 passed, 1 failed, 0 errored, 0 broken."
+    rule = "quality.aqua"
+
+        [analyzers.representative_findings.location]
+        file = ""
+        line = 0
+[[analyzers]]
+analysis_scope = "operation specialized for prepared state type; synchronization excluded"
+artifacts = []
+correctness = "passed"
+direct_target_locations = 0
+finding_count = 218
+quality = "not_checked"
+scenario = "milp_width_16"
+status = "complete"
+summary = ""
+tool = "jet"
+tool_version = "0.12.3"
+
+    [analyzers.measurements]
+
+    [[analyzers.representative_findings]]
+    message = "RuntimeDispatchReport(runtime dispatch detected: Base._array_for_inner(%57::DataType, Base.HasShape{1}(), %10::Tuple{Base.OneTo{Int64}})::Vector)"
+    rule = "inference.runtime_dispatch"
+
+        [analyzers.representative_findings.location]
+        file = "array.jl"
+        line = 833
+[[analyzers]]
+analysis_scope = "static operation specialization; tool exception-path defaults; not a universal allocation guarantee"
+artifacts = []
+correctness = "passed"
+direct_target_locations = 0
+finding_count = 305
+quality = "not_checked"
+scenario = "milp_width_16"
+status = "complete"
+summary = ""
+tool = "alloccheck"
+tool_version = "0.2.6"
+
+    [analyzers.measurements]
+
+    [[analyzers.representative_findings]]
+    message = """Allocation of MathOptInterface.Utilities.ObjectiveContainer{Float64} in /home/azzaare/.julia/packages/MathOptInterface/lY2WB/src/Utilities/objective_container.jl:26\n  | o = new{T}()\n\nStacktrace:\n [1] ObjectiveContainer\n   @ ~/.julia/package"""
+    rule = "allocation.potential"
+
+        [analyzers.representative_findings.location]
+        file = "/home/azzaare/.julia/packages/MathOptInterface/lY2WB/src/Utilities/objective_container.jl"
+        line = 26
+[[analyzers]]
+analysis_scope = "first complete scenario lifecycle in diagnostic process"
+artifacts = []
+correctness = "passed"
+direct_target_locations = 0
+finding_count = 1
+quality = "not_checked"
+scenario = "milp_width_16"
+status = "complete"
+summary = ""
+tool = "snoopcompile"
+tool_version = "3.2.9"
+
+    [analyzers.measurements]
+    inference_seconds = 2.4973077178001404
+
+    [[analyzers.representative_findings]]
+    message = "InferenceTimingNode: 0.000014/2.497308 on Base.Compiler.Timings.ROOT() with 89 direct children"
+    rule = "compilation.inference"
+
+        [analyzers.representative_findings.location]
+        file = ""
+        line = 0
+[[analyzers]]
+analysis_scope = "fresh process; source loading; full lifecycle including preparation and verification"
+artifacts = []
+correctness = "passed"
+direct_target_locations = 0
+finding_count = 0
+quality = "not_checked"
+representative_findings = []
+scenario = "milp_width_16"
+status = "complete"
+summary = ""
+tool = "latency"
+tool_version = "builtin"
+
+    [analyzers.measurements]
+    first_case_seconds = 5.746602908
+    load_seconds = 2.872990312
+    warm_case_seconds = 0.012299961
+[[analyzers]]
+analysis_scope = "warmed operation and synchronization; fresh state; preparation, verification and cleanup excluded"
+artifacts = []
+correctness = "passed"
+direct_target_locations = 0
+finding_count = 0
+quality = "not_checked"
+representative_findings = []
+scenario = "milp_width_16"
+status = "complete"
+summary = "3 operations: 0.0 ms in GC, 912784 allocated bytes in total. Diagnostic counters are process-wide."
+tool = "gc"
+tool_version = "builtin"
+
+    [analyzers.measurements]
+    sample_count = 3
+
+        [analyzers.measurements.allocated_bytes]
+        maximum = 306800
+        minimum = 302992
+
+        [analyzers.measurements.gc_seconds]
+        maximum = 0.0
+        minimum = 0.0
+
+        [analyzers.measurements.lock_conflicts]
+        maximum = 0
+        minimum = 0
+
+        [analyzers.measurements.operation_seconds]
+        maximum = 0.000351587
+        minimum = 0.000295717
+[[analyzers]]
+analysis_scope = ""
+artifacts = []
+correctness = "passed"
+direct_target_locations = 0
+finding_count = 0
+quality = "not_checked"
+representative_findings = []
+scenario = "milp_width_16"
+status = "complete"
+summary = "3 operations: reachable state changed by 0 to 0 bytes. Growth may be intended output or a cache; it does not establish a leak."
+tool = "memory"
+tool_version = "builtin"
+
+    [analyzers.measurements]
+    sample_count = 3
+
+        [analyzers.measurements.state_after_bytes]
+        maximum = 24276
+        minimum = 24276
+
+        [analyzers.measurements.state_and_result_bytes]
+        maximum = 53648
+        minimum = 53648
+
+        [analyzers.measurements.state_before_bytes]
+        maximum = 24276
+        minimum = 24276
+[[analyzers]]
+analysis_scope = ""
+artifacts = []
+correctness = "passed"
+direct_target_locations = 0
+finding_count = 0
+quality = "not_checked"
+representative_findings = []
+scenario = "milp_width_16"
+status = "complete"
+summary = "3 operations: 0 observed lock conflicts. Counts do not measure waiting duration."
+tool = "locks"
+tool_version = "builtin"
+
+    [analyzers.measurements]
+    sample_count = 3
+
+        [analyzers.measurements.allocated_bytes]
+        maximum = 307312
+        minimum = 302992
+
+        [analyzers.measurements.gc_seconds]
+        maximum = 0.0
+        minimum = 0.0
+
+        [analyzers.measurements.lock_conflicts]
+        maximum = 0
+        minimum = 0
+
+        [analyzers.measurements.operation_seconds]
+        maximum = 0.0003234
+        minimum = 0.000279541
+[[analyzers]]
+analysis_scope = ""
+correctness = "passed"
+direct_target_locations = 0
+finding_count = 0
+quality = "not_checked"
+representative_findings = []
+scenario = "milp_width_16"
+status = "complete"
+summary = "Redacted heap snapshot captured after verification. Covers GC-managed objects in the whole worker; native and device memory are excluded."
+tool = "heap"
+tool_version = "builtin"
+
+    [[analyzers.artifacts]]
+    bytes = 375873137
+    kind = "heap_snapshot"
+    redacted = true
+    sha256 = "6f9a36fdc9c4bfb155ed35205d1e6cddc2decd93a44f28f86550cc9dfbfa0124"
+
+    [analyzers.measurements]
+
+[aqua]
+baseline = "failed: missing HiGHS and Test extras compatibility bounds"
+candidate = "default Aqua.test_all passed after adding HiGHS 1 and Test 1"
+version = "0.8.18"
+
+[[baseline.milp_construction]]
+allocations = 901
+bytes = 39496
+median_seconds = 0.000133285
+oracle = "passed"
+width = 4
+
+    [baseline.milp_construction.allocation_sites]
+    "#validate_milp##0:51" = 9832
+    "add_bridges!:11" = 40
+    "add_bridges!:12" = 16
+    "affine:20" = 112
+    "compile_milp:67" = 624
+    "compile_milp:68" = 3440
+    "compile_milp:69" = 174
+    "emit_relations!:17" = 64
+    "emit_relations!:19" = 32
+    "emit_relations!:23" = 6500
+    "emit_relations!:31" = 72
+    "emit_relations!:32" = 80
+    "emit_relations!:34" = 1968
+    "emit_relations!:37" = 5680
+    "emit_relations!:43" = 200
+    "exact_float:3" = 2112
+[[baseline.milp_construction]]
+allocations = 2395
+bytes = 100376
+median_seconds = 7.2641e-5
+oracle = "passed"
+width = 8
+
+    [baseline.milp_construction.allocation_sites]
+    "#validate_milp##0:51" = 36928
+    "add_bridges!:11" = 40
+    "add_bridges!:12" = 16
+    "affine:20" = 112
+    "compile_milp:67" = 624
+    "compile_milp:68" = 3440
+    "compile_milp:69" = 174
+    "emit_relations!:17" = 64
+    "emit_relations!:19" = 32
+    "emit_relations!:23" = 7268
+    "emit_relations!:31" = 72
+    "emit_relations!:32" = 80
+    "emit_relations!:34" = 7784
+    "emit_relations!:37" = 15436
+    "emit_relations!:43" = 200
+    "exact_float:3" = 7232
+[[baseline.milp_construction]]
+allocations = 8427
+bytes = 347824
+median_seconds = 0.000262516
+oracle = "passed"
+width = 16
+
+    [baseline.milp_construction.allocation_sites]
+    "#validate_milp##0:51" = 145904
+    "add_bridges!:11" = 40
+    "add_bridges!:12" = 16
+    "affine:20" = 112
+    "compile_milp:67" = 624
+    "compile_milp:68" = 3440
+    "compile_milp:69" = 174
+    "emit_relations!:17" = 64
+    "emit_relations!:19" = 32
+    "emit_relations!:23" = 11552
+    "emit_relations!:31" = 72
+    "emit_relations!:32" = 80
+    "emit_relations!:34" = 30880
+    "emit_relations!:37" = 51924
+    "emit_relations!:43" = 200
+    "exact_float:3" = 26688
+
+[[candidate.milp_construction]]
+allocations = 788
+bytes = 35480
+median_seconds = 0.000126739
+oracle = "passed"
+width = 4
+[[candidate.milp_construction]]
+allocations = 1978
+bytes = 88664
+median_seconds = 8.475500000000001e-5
+oracle = "passed"
+width = 8
+[[candidate.milp_construction]]
+allocations = 6826
+bytes = 303072
+median_seconds = 0.00025678100000000003
+oracle = "passed"
+width = 16
+
+[[collectors]]
+collector = "benchmark"
+correctness = "passed"
+cpu_samples = 0
+scenario = "milp_width_8"
+status = "complete"
+
+    [collectors."julia.alloc.bytes"]
+    count = 5
+    maximum = 88648.0
+    median = 88648.0
+    minimum = 88648.0
+
+    [collectors."julia.alloc.count"]
+    count = 5
+    maximum = 1978.0
+    median = 1978.0
+    minimum = 1978.0
+
+    [collectors."julia.wall.time"]
+    count = 5
+    maximum = 0.000182141
+    median = 0.000127592
+    minimum = 0.000127047
+[[collectors]]
+collector = "chairmark"
+correctness = "passed"
+cpu_samples = 0
+scenario = "milp_width_8"
+status = "complete"
+
+    [collectors."julia.alloc.bytes"]
+    count = 5
+    maximum = 88696.0
+    median = 88680.0
+    minimum = 88648.0
+
+    [collectors."julia.alloc.count"]
+    count = 5
+    maximum = 1978.0
+    median = 1978.0
+    minimum = 1978.0
+
+    [collectors."julia.wall.time"]
+    count = 5
+    maximum = 0.000177486
+    median = 0.000128805
+    minimum = 0.00010031200000000001
+[[collectors]]
+collector = "profile"
+correctness = "passed"
+cpu_samples = 0
+scenario = "milp_width_8"
+status = "complete"
+[[collectors]]
+collector = "profile_alloc"
+correctness = "passed"
+cpu_samples = 9035
+scenario = "milp_width_8"
+status = "complete"
+
+    [collectors.allocation_profile]
+    profile_evaluations = 5
+    sample_rate = 1.0
+    sampled_allocations = 9035
+    status = "complete"
+    total_allocations = 1978
+    total_bytes = 88856
+    total_measurement_evaluations = 2
+
+    [collectors."julia.alloc.bytes"]
+    count = 1
+    maximum = 88856.0
+    median = 88856.0
+    minimum = 88856.0
+
+    [collectors."julia.alloc.count"]
+    count = 1
+    maximum = 1978.0
+    median = 1978.0
+    minimum = 1978.0
+[[collectors]]
+collector = "benchmark"
+correctness = "passed"
+cpu_samples = 0
+scenario = "milp_width_16"
+status = "complete"
+
+    [collectors."julia.alloc.bytes"]
+    count = 5
+    maximum = 303008.0
+    median = 303008.0
+    minimum = 303008.0
+
+    [collectors."julia.alloc.count"]
+    count = 5
+    maximum = 6826.0
+    median = 6826.0
+    minimum = 6826.0
+
+    [collectors."julia.wall.time"]
+    count = 5
+    maximum = 0.000366205
+    median = 0.000294211
+    minimum = 0.000279593
+[[collectors]]
+collector = "chairmark"
+correctness = "passed"
+cpu_samples = 0
+scenario = "milp_width_16"
+status = "complete"
+
+    [collectors."julia.alloc.bytes"]
+    count = 5
+    maximum = 303120.0
+    median = 302976.0
+    minimum = 302976.0
+
+    [collectors."julia.alloc.count"]
+    count = 5
+    maximum = 6826.0
+    median = 6826.0
+    minimum = 6826.0
+
+    [collectors."julia.wall.time"]
+    count = 5
+    maximum = 0.000503931
+    median = 0.000324052
+    minimum = 0.00030183
+[[collectors]]
+collector = "profile"
+correctness = "passed"
+cpu_samples = 0
+scenario = "milp_width_16"
+status = "complete"
+[[collectors]]
+collector = "profile_alloc"
+correctness = "passed"
+cpu_samples = 31195
+scenario = "milp_width_16"
+status = "complete"
+
+    [collectors.allocation_profile]
+    profile_evaluations = 5
+    sample_rate = 1.0
+    sampled_allocations = 31195
+    status = "complete"
+    total_allocations = 6826
+    total_bytes = 303136
+    total_measurement_evaluations = 2
+
+    [collectors."julia.alloc.bytes"]
+    count = 1
+    maximum = 303136.0
+    median = 303136.0
+    minimum = 303136.0
+
+    [collectors."julia.alloc.count"]
+    count = 1
+    maximum = 6826.0
+    median = 6826.0
+    minimum = 6826.0
+
+[scenario_source_fingerprints]
+"/home/azzaare/.julia/dev/JuliaConstraintsPerfNightQUBO/XCSP3Bridges/perf/scenarios.jl" = "872fe1667aea26d922ffb02df73394f8ebc337b9d33ca631db1b46e42e38523b"
+
+[source_hashes]
+"src/XCSP3Bridges.jl" = "40950c934a52f8e65e7a93e0b31f2e160b102c2222584beb7849bcb1865f0756"
+"src/milp.jl" = "3da667b9cd637d02409187275565c90da921571cbbdae45f378c656388bdc78f"
+"src/networks.jl" = "f12c294fbd2834d3ed087acb0a19d7a5696488e30831947df6e437083411164e"
+"src/serialization.jl" = "335ad6e68a330b80db2422f1f8b45f43e6fd906d434ebb6ee2c5c51319070e7d"
+"src/training.jl" = "61f9a5edfa29d368956f080d623ad0f84ec062ac38c5d4947590636d41efffc3"
+
+[tests]
+assertions = 541
+regressions = "Repeated graph insertion owns output handles; source aliases and duplicate predecessor ports retain identity; unrepresentable domains and mutated plans fail before model variable counts change."
+scenario_oracle = "All original-domain pairs at widths 8 and 16 are checked against independently inferred primitive one-hot witnesses and the original equality predicate. Selector order is inferred from actual equations."
+solver = "Installed HiGHS 1.26.0; one thread and five-second limit per tiny projection solve."
+status = "passed"

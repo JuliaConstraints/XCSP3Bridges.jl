@@ -13,25 +13,32 @@ function add_bridges!(model)
     model
 end
 
-function emit_relations!(model, plan, variables)
+const ProgramConstraint = Union{
+    MOI.ConstraintIndex{MOI.VariableIndex,CPE.Domain{Float64}},
+    MOI.ConstraintIndex{MOI.VectorOfVariables,CPE.VectorDomain{Float64}},
+    MOI.ConstraintIndex{MOI.ScalarAffineFunction{Float64},MOI.EqualTo{Float64}},
+}
+
+function emit_relations!(model, plan, variables, domain_values)
     sources = zeros(Int, length(plan.codebooks))
     domain_relations = operation_relations = 0
-    constraints = Any[]
+    constraints = ProgramConstraint[]
+    sizehint!(constraints, length(plan.nodes) + 1)
     affine(variable) = MOI.ScalarAffineFunction([MOI.ScalarAffineTerm(1.0, variable)], 0.0)
     for (index, node) in enumerate(plan.nodes)
         if node.operator === :variable
             push!(constraints, MOI.add_constraint(model, variables[index],
-                CPE.Domain(Set(exact_float.(node.domain)))))
-            sources[node.data] = variables[index].value
+                CPE.Domain(Set(domain_values[index]))))
+            sources[node.data::Int] = variables[index].value
             domain_relations += 1
         elseif node.operator === :constant
             push!(constraints, MOI.add_constraint(model, affine(variables[index]),
-                MOI.EqualTo(exact_float(node.data))))
+                MOI.EqualTo(only(domain_values[index]))))
         else
             ports = [node.inputs; index]
             rows = Set{Vector{Float64}}()
             for row in node.rows
-                push!(rows, [exact_float(plan.nodes[port].domain[column])
+                push!(rows, [domain_values[port][column]
                     for (port, column) in zip(ports, row)])
             end
             push!(constraints, MOI.add_constraint(model, MOI.VectorOfVariables(variables[ports]),
@@ -50,10 +57,9 @@ function validate_milp(program)
     budget_boundary() do
         QC.validate_atomic_plan(program.plan)
     end
-    for node in program.plan.nodes, value in node.domain
-        exact_float(value)
-    end
-    nothing
+    # Convert each checked domain once before modifying the caller's model.
+    # Local rows reuse these exact values; each emitted table still owns its rows.
+    [exact_float.(node.domain) for node in program.plan.nodes]
 end
 
 """Compile model + weights into an ordinary primitive MOI MILP.
@@ -63,11 +69,11 @@ satisfaction. Tables describe individual atoms only, never a whole constraint.
 No solver, source recipe, constraint family or validation labels are required.
 """
 function compile_milp(program::Program)
-    validate_milp(program)
+    domain_values = validate_milp(program)
     linear = MOI.Utilities.Model{Float64}()
     model = add_bridges!(MOI.Bridges.LazyBridgeOptimizer(linear))
     variables = MOI.add_variables(model, length(program.plan.nodes))
-    emitted = emit_relations!(model, program.plan, variables)
+    emitted = emit_relations!(model, program.plan, variables, domain_values)
     (; linear, emitted.sources, emitted.root, emitted.domain_relations, emitted.operation_relations)
 end
 compile_milp(space::NetworkSpace, network) = compile_milp(decode_network(space, network))
@@ -80,7 +86,7 @@ added graph constraint and auxiliary variable. Sources may repeat (aliases).
 """
 function add_program!(model, program::Program, sources::AbstractVector{MOI.VariableIndex})
     length(sources) == length(program.plan.codebooks) || throw(DimensionMismatch("source variables"))
-    validate_milp(program)
+    domain_values = validate_milp(program)
     variables = MOI.VariableIndex[]
     auxiliaries = MOI.VariableIndex[]
     for node in program.plan.nodes
@@ -92,7 +98,7 @@ function add_program!(model, program::Program, sources::AbstractVector{MOI.Varia
             push!(auxiliaries, variable)
         end
     end
-    emitted = emit_relations!(model, program.plan, variables)
+    emitted = emit_relations!(model, program.plan, variables, domain_values)
     (; emitted..., auxiliaries)
 end
 
