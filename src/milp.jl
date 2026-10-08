@@ -128,7 +128,14 @@ function bridge_payload(bridge)
             error("unexpected unbridged primitive: $F in $S")
         end
     end
-    sort!(equalities; by=payload_digest)
+    if length(equalities)>2
+        # Digest serialization is substantially costlier than comparing keys.
+        # sortperm preserves the original order when equation digests tie.
+        digests=map(payload_digest,equalities)
+        equalities=equalities[sortperm(digests)]
+    else
+        sort!(equalities; by=payload_digest)
+    end
     Dict("schema_version"=>"cpe-atomic-milp-witness/1",
         "decoder"=>"QUBOConstraints.decode_atomic_weights",
         "bridges"=>["CPE.Domain2MILPBridge", "CPE.VectorDomain2MILPBridge"],

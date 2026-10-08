@@ -152,6 +152,63 @@ end
         @test MOI.get(model, MOI.NumberOfVariables()) == before
     end
 
+    @testset "Canonical primitive serialization and digest ordering" begin
+        as_bridge(linear)=(;linear,sources=[1,2],root=3,domain_relations=0,operation_relations=0)
+        for count in 0:2
+            linear=MOI.Utilities.Model{Float64}()
+            variables=MOI.add_variables(linear,3)
+            for rhs in 1:count
+                MOI.add_constraint(linear,MOI.ScalarAffineFunction([MOI.ScalarAffineTerm(1.0,variables[1])],0.0),MOI.EqualTo(Float64(rhs)))
+            end
+            payload=XB.bridge_payload(as_bridge(linear))
+            @test length(payload["equalities"])==count
+            @test issorted(XB.payload_digest.(payload["equalities"]))
+            @test XB.bridge_payload(as_bridge(XB.restore_bridge(payload)))==payload
+        end
+        linear=MOI.Utilities.Model{Float64}()
+        variables=MOI.add_variables(linear,3)
+        MOI.add_constraint(linear,variables[1],MOI.ZeroOne())
+        f=MOI.ScalarAffineFunction([
+            MOI.ScalarAffineTerm(3.0,variables[2]),MOI.ScalarAffineTerm(1.0,variables[1]),
+            MOI.ScalarAffineTerm(-1.0,variables[1]),MOI.ScalarAffineTerm(2.0,variables[1]),
+            MOI.ScalarAffineTerm(-3.0,variables[2])],-7.0)
+        for _ in 1:2;MOI.add_constraint(linear,copy(f),MOI.EqualTo(11.0));end
+        MOI.add_constraint(linear,MOI.ScalarAffineFunction(MOI.ScalarAffineTerm{Float64}[],5.0),MOI.EqualTo(7.0))
+        MOI.add_constraint(linear,MOI.ScalarAffineFunction([MOI.ScalarAffineTerm(1.0,variables[3])],0.0),MOI.EqualTo(1.0))
+        # These equations are written independently of the emitted constraint
+        # order, including duplicate equations and cancelled input terms.
+        duplicate=Dict("terms"=>[Dict("variable"=>1,"coefficient"=>"2")],"constant"=>"-7","rhs"=>"11")
+        expected=[duplicate,deepcopy(duplicate),
+            Dict("terms"=>Dict{String,Any}[],"constant"=>"5","rhs"=>"7"),
+            Dict("terms"=>[Dict("variable"=>3,"coefficient"=>"1")],"constant"=>"0","rhs"=>"1")]
+        sort!(expected;by=XB.payload_digest)
+        payload=XB.bridge_payload(as_bridge(linear))
+        @test payload["equalities"]==expected
+        @test payload["binary_variables"]==[1]
+        @test payload["variables"]==3 && payload["source_variables"]==[1,2] && payload["root_variable"]==3
+        @test issorted(XB.payload_digest.(payload["equalities"]))
+        @test count(==(duplicate),payload["equalities"])==2
+        repeated=XB.bridge_payload(as_bridge(linear))
+        @test repeated==payload && XB.payload_digest(repeated)==XB.payload_digest(payload)
+        @test repeated["equalities"]!==payload["equalities"]
+        @test all(a!==b && a["terms"]!==b["terms"] for (a,b) in zip(repeated["equalities"],payload["equalities"]))
+        @test XB.bridge_payload(as_bridge(XB.restore_bridge(payload)))==payload
+        first_nonempty=findfirst(e->!isempty(e["terms"]),payload["equalities"])
+        payload["equalities"][first_nonempty]["terms"][1]["coefficient"]="99"
+        @test XB.bridge_payload(as_bridge(linear))==repeated
+        for location in (:coefficient,:constant,:rhs)
+            model=MOI.Utilities.Model{Float64}();v=MOI.add_variables(model,3)
+            coefficient=location===:coefficient ? 0.5 : 1.0
+            constant=location===:constant ? 0.5 : 0.0
+            rhs=location===:rhs ? 0.5 : 1.0
+            MOI.add_constraint(model,MOI.ScalarAffineFunction([MOI.ScalarAffineTerm(coefficient,v[1])],constant),MOI.EqualTo(rhs))
+            @test_throws InexactError XB.bridge_payload(as_bridge(model))
+        end
+        unsupported=MOI.Utilities.Model{Float64}();v=MOI.add_variables(unsupported,3)
+        MOI.add_constraint(unsupported,v[1],MOI.GreaterThan(0.0))
+        @test_throws ErrorException XB.bridge_payload(as_bridge(unsupported))
+    end
+
     @testset "Small learner and failure classification" begin
         s = XB.NetworkSpace([0:1]; slots=1, operators=(:not, :and), constants=0:1)
         result = XB.train(s, [[0], [1]], Bool[true, false]; max_candidates=9)

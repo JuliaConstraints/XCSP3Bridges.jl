@@ -50,6 +50,18 @@ function primitive_equality_oracle(payload, width)
     true
 end
 
+"Serialize a prepared bridge while independently checking its primitive equations."
+function milp_payload_case(parameters)
+    width = get(parameters, "width", 8)
+    construction = milp_construction_case(parameters)
+    program = construction.prepare()
+    bridge = construction.operation(program)
+    prepare = () -> bridge
+    operation = state -> XB.bridge_payload(state)
+    verify = (state, payload) -> primitive_equality_oracle(payload, width)
+    (; prepare, operation, verify)
+end
+
 "Compile one decoded equality atom; graph decoding and independent table checks are outside measurement."
 function milp_construction_case(parameters)
     width = get(parameters, "width", 8)

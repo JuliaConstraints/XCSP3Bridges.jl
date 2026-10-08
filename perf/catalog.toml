@@ -3,6 +3,30 @@ schema_version = "perfchecker-scenario-catalog/1"
 
 [[scenarios]]
 collectors = ["benchmark", "chairmark", "profile", "profile_alloc"]
+factory = "milp_payload_case"
+id = "milp_payload_width_8"
+implementation = "cached-canonical-equation-digests-v1"
+repeatable = true
+requirements = ["XCSP3Bridges", "MathOptInterface"]
+source = "scenarios.jl"
+
+    [scenarios.parameters]
+    width = 8
+
+[[scenarios]]
+collectors = ["benchmark", "chairmark", "profile", "profile_alloc"]
+factory = "milp_payload_case"
+id = "milp_payload_width_16"
+implementation = "cached-canonical-equation-digests-v1"
+repeatable = true
+requirements = ["XCSP3Bridges", "MathOptInterface"]
+source = "scenarios.jl"
+
+    [scenarios.parameters]
+    width = 16
+
+[[scenarios]]
+collectors = ["benchmark", "chairmark", "profile", "profile_alloc"]
 factory = "milp_construction_case"
 id = "milp_width_8"
 implementation = "typed-handles-owned-domains-v1"
