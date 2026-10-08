@@ -14,7 +14,7 @@ perfchecker = "1.0.0"
 precompile_tasks = 1
 profile_semantics = "CPU samples and allocation events are separate. Allocation byte/count totals are independent operation measurements; sampled stacks are not used to infer those totals."
 qualification = "Operation and preparation scopes are explicit. All observations use owned state and independent oracles. Concurrent overnight tasks were active; timings are operational comparisons, not controlled scaling. Allocation counts describe Julia-managed operation allocations; native solver and whole-process memory are separate."
-recorded_utc = "2026-10-08T22:55:55.562"
+recorded_utc = "2026-10-08T23:12:38.551"
 remaining_hotspots = ["Authoritative exact atomic-plan validation, owned MOI models and local relation tables retain necessary construction allocations.", "Canonical payload serialization still allocates coefficient dictionaries, exact BigInt reductions, decimal coefficient strings, TOML buffers and one SHA digest per equation.", "JET and AllocCheck findings remain advisory static reports; they include generic MOI paths, exact arithmetic, serialization and intentional result ownership. Phase-specific native counts are recorded.", "Native solver and whole-process memory are outside Julia-managed operation byte/count observations. Timings are bounded operational measurements under concurrent overnight activity."]
 schema = "qualified-performance-increment/1"
 unavailable = ["Linux perf counters denied by perf_event_paranoid=4; kernel policy unchanged."]
@@ -6880,6 +6880,375 @@ status = "complete"
 
 [scenario_source_fingerprints]
 "/home/azzaare/.julia/dev/JuliaConstraintsPerfNightQUBO/XCSP3Bridges/perf/scenarios.jl" = "872fe1667aea26d922ffb02df73394f8ebc337b9d33ca631db1b46e42e38523b"
+
+[serializer_experiments]
+baseline_commit = "ba09e43c9fe57eb6163ae6af9e4523383bf5ed23"
+
+    [serializer_experiments.digest_buffers]
+    reason = "The owned byte-buffer path saved only 2736 bytes on the 2499488-byte width-32 complete digest and added one allocation; the empty control increased from 672 bytes/13 allocations to 800/16. IO streaming added a roughly 4 KiB buffer and more allocations. Canonical SHAs matched; no material general improvement was qualified."
+    status = "not_selected"
+
+        [serializer_experiments.digest_buffers.evidence]
+        scope = "Private digest buffer prototypes using identical sorted standard-library TOML output and canonical SHA. Small/escaped dictionary, complete bridge payload and individual equations. No package source mutation."
+
+            [[serializer_experiments.digest_buffers.evidence.measurements]]
+            implementation = "published"
+            median_allocations = 13.0
+            median_bytes = 672.0
+            median_seconds = 3.23e-7
+            observations = 20
+            oracle = "passed"
+            payload_sha256 = "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            shape = "empty"
+            [[serializer_experiments.digest_buffers.evidence.measurements]]
+            implementation = "owned_byte_buffer"
+            median_allocations = 16.0
+            median_bytes = 800.0
+            median_seconds = 3.86e-7
+            observations = 20
+            oracle = "passed"
+            payload_sha256 = "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            shape = "empty"
+            [[serializer_experiments.digest_buffers.evidence.measurements]]
+            implementation = "io_stream"
+            median_allocations = 18.0
+            median_bytes = 4936.0
+            median_seconds = 6.445e-7
+            observations = 20
+            oracle = "passed"
+            payload_sha256 = "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            shape = "empty"
+            [[serializer_experiments.digest_buffers.evidence.measurements]]
+            implementation = "published"
+            median_allocations = 46.0
+            median_bytes = 2144.0
+            median_seconds = 5.8245e-6
+            observations = 20
+            oracle = "passed"
+            payload_sha256 = "4d55cf16e0ab365eb2fe7b8f6cc7307036d54dd6d94cd8e2a933f269b2e61efd"
+            shape = "escaped"
+            [[serializer_experiments.digest_buffers.evidence.measurements]]
+            implementation = "owned_byte_buffer"
+            median_allocations = 43.0
+            median_bytes = 1872.0
+            median_seconds = 5.598e-6
+            observations = 20
+            oracle = "passed"
+            payload_sha256 = "4d55cf16e0ab365eb2fe7b8f6cc7307036d54dd6d94cd8e2a933f269b2e61efd"
+            shape = "escaped"
+            [[serializer_experiments.digest_buffers.evidence.measurements]]
+            implementation = "io_stream"
+            median_allocations = 45.0
+            median_bytes = 6008.0
+            median_seconds = 5.6560000000000006e-6
+            observations = 20
+            oracle = "passed"
+            payload_sha256 = "4d55cf16e0ab365eb2fe7b8f6cc7307036d54dd6d94cd8e2a933f269b2e61efd"
+            shape = "escaped"
+            [[serializer_experiments.digest_buffers.evidence.measurements]]
+            implementation = "published"
+            median_allocations = 1358.0
+            median_bytes = 58672.0
+            median_seconds = 0.00019485700000000002
+            observations = 20
+            oracle = "passed"
+            payload_sha256 = "505f18fa30331a342952ba52e058a49309de2762e78183cfdb9c0de449abbca9"
+            shape = "bridge_4"
+            [[serializer_experiments.digest_buffers.evidence.measurements]]
+            implementation = "owned_byte_buffer"
+            median_allocations = 1359.0
+            median_bytes = 57792.0
+            median_seconds = 0.00019406150000000002
+            observations = 20
+            oracle = "passed"
+            payload_sha256 = "505f18fa30331a342952ba52e058a49309de2762e78183cfdb9c0de449abbca9"
+            shape = "bridge_4"
+            [[serializer_experiments.digest_buffers.evidence.measurements]]
+            implementation = "io_stream"
+            median_allocations = 1361.0
+            median_bytes = 61928.0
+            median_seconds = 0.00019894250000000003
+            observations = 20
+            oracle = "passed"
+            payload_sha256 = "505f18fa30331a342952ba52e058a49309de2762e78183cfdb9c0de449abbca9"
+            shape = "bridge_4"
+            [[serializer_experiments.digest_buffers.evidence.measurements]]
+            implementation = "published"
+            median_allocations = 46.0
+            median_bytes = 2000.0
+            median_seconds = 6.848e-6
+            observations = 20
+            oracle = "passed"
+            payload_sha256 = "026bc8984b4f269194eb59af6e991cb1c3f129d4e1a904e701cc949ea0f39daf"
+            shape = "equation_4"
+            [[serializer_experiments.digest_buffers.evidence.measurements]]
+            implementation = "owned_byte_buffer"
+            median_allocations = 47.0
+            median_bytes = 2032.0
+            median_seconds = 6.9045000000000006e-6
+            observations = 20
+            oracle = "passed"
+            payload_sha256 = "026bc8984b4f269194eb59af6e991cb1c3f129d4e1a904e701cc949ea0f39daf"
+            shape = "equation_4"
+            [[serializer_experiments.digest_buffers.evidence.measurements]]
+            implementation = "io_stream"
+            median_allocations = 49.0
+            median_bytes = 6168.0
+            median_seconds = 7.114e-6
+            observations = 20
+            oracle = "passed"
+            payload_sha256 = "026bc8984b4f269194eb59af6e991cb1c3f129d4e1a904e701cc949ea0f39daf"
+            shape = "equation_4"
+            [[serializer_experiments.digest_buffers.evidence.measurements]]
+            implementation = "published"
+            median_allocations = 3970.0
+            median_bytes = 186352.0
+            median_seconds = 0.0005408240000000001
+            observations = 20
+            oracle = "passed"
+            payload_sha256 = "ac74d8600278cabcb05e0bfb13a27b085ee1dc141ca13f07e1ca3fecebf599cd"
+            shape = "bridge_8"
+            [[serializer_experiments.digest_buffers.evidence.measurements]]
+            implementation = "owned_byte_buffer"
+            median_allocations = 3971.0
+            median_bytes = 185024.0
+            median_seconds = 0.000528473
+            observations = 20
+            oracle = "passed"
+            payload_sha256 = "ac74d8600278cabcb05e0bfb13a27b085ee1dc141ca13f07e1ca3fecebf599cd"
+            shape = "bridge_8"
+            [[serializer_experiments.digest_buffers.evidence.measurements]]
+            implementation = "io_stream"
+            median_allocations = 3973.0
+            median_bytes = 189160.0
+            median_seconds = 0.0005293775000000001
+            observations = 20
+            oracle = "passed"
+            payload_sha256 = "ac74d8600278cabcb05e0bfb13a27b085ee1dc141ca13f07e1ca3fecebf599cd"
+            shape = "bridge_8"
+            [[serializer_experiments.digest_buffers.evidence.measurements]]
+            implementation = "published"
+            median_allocations = 46.0
+            median_bytes = 2000.0
+            median_seconds = 7.339e-6
+            observations = 20
+            oracle = "passed"
+            payload_sha256 = "026bc8984b4f269194eb59af6e991cb1c3f129d4e1a904e701cc949ea0f39daf"
+            shape = "equation_8"
+            [[serializer_experiments.digest_buffers.evidence.measurements]]
+            implementation = "owned_byte_buffer"
+            median_allocations = 47.0
+            median_bytes = 2032.0
+            median_seconds = 6.7765e-6
+            observations = 20
+            oracle = "passed"
+            payload_sha256 = "026bc8984b4f269194eb59af6e991cb1c3f129d4e1a904e701cc949ea0f39daf"
+            shape = "equation_8"
+            [[serializer_experiments.digest_buffers.evidence.measurements]]
+            implementation = "io_stream"
+            median_allocations = 49.0
+            median_bytes = 6168.0
+            median_seconds = 6.977000000000001e-6
+            observations = 20
+            oracle = "passed"
+            payload_sha256 = "026bc8984b4f269194eb59af6e991cb1c3f129d4e1a904e701cc949ea0f39daf"
+            shape = "equation_8"
+            [[serializer_experiments.digest_buffers.evidence.measurements]]
+            implementation = "published"
+            median_allocations = 13990.0
+            median_bytes = 684592.0
+            median_seconds = 0.0016811900000000002
+            observations = 20
+            oracle = "passed"
+            payload_sha256 = "e18e20786da9eab3ea602655c076f6c9bfd869cfbafe8e119f89b706c7f557ec"
+            shape = "bridge_16"
+            [[serializer_experiments.digest_buffers.evidence.measurements]]
+            implementation = "owned_byte_buffer"
+            median_allocations = 13991.0
+            median_bytes = 682496.0
+            median_seconds = 0.0016769885
+            observations = 20
+            oracle = "passed"
+            payload_sha256 = "e18e20786da9eab3ea602655c076f6c9bfd869cfbafe8e119f89b706c7f557ec"
+            shape = "bridge_16"
+            [[serializer_experiments.digest_buffers.evidence.measurements]]
+            implementation = "io_stream"
+            median_allocations = 13993.0
+            median_bytes = 686632.0
+            median_seconds = 0.0016515940000000002
+            observations = 20
+            oracle = "passed"
+            payload_sha256 = "e18e20786da9eab3ea602655c076f6c9bfd869cfbafe8e119f89b706c7f557ec"
+            shape = "bridge_16"
+            [[serializer_experiments.digest_buffers.evidence.measurements]]
+            implementation = "published"
+            median_allocations = 46.0
+            median_bytes = 2000.0
+            median_seconds = 7.0105e-6
+            observations = 20
+            oracle = "passed"
+            payload_sha256 = "026bc8984b4f269194eb59af6e991cb1c3f129d4e1a904e701cc949ea0f39daf"
+            shape = "equation_16"
+            [[serializer_experiments.digest_buffers.evidence.measurements]]
+            implementation = "owned_byte_buffer"
+            median_allocations = 47.0
+            median_bytes = 2032.0
+            median_seconds = 6.954500000000001e-6
+            observations = 20
+            oracle = "passed"
+            payload_sha256 = "026bc8984b4f269194eb59af6e991cb1c3f129d4e1a904e701cc949ea0f39daf"
+            shape = "equation_16"
+            [[serializer_experiments.digest_buffers.evidence.measurements]]
+            implementation = "io_stream"
+            median_allocations = 49.0
+            median_bytes = 6168.0
+            median_seconds = 6.915000000000001e-6
+            observations = 20
+            oracle = "passed"
+            payload_sha256 = "026bc8984b4f269194eb59af6e991cb1c3f129d4e1a904e701cc949ea0f39daf"
+            shape = "equation_16"
+            [[serializer_experiments.digest_buffers.evidence.measurements]]
+            implementation = "published"
+            median_allocations = 56437.0
+            median_bytes = 2.499488e6
+            median_seconds = 0.012512578000000002
+            observations = 20
+            oracle = "passed"
+            payload_sha256 = "30d8f9440d1c0b2d55bf0e7f6914dde3919c70208ef897614def69c0b4c7a200"
+            shape = "bridge_32"
+            [[serializer_experiments.digest_buffers.evidence.measurements]]
+            implementation = "owned_byte_buffer"
+            median_allocations = 56438.0
+            median_bytes = 2.496752e6
+            median_seconds = 0.012433042
+            observations = 20
+            oracle = "passed"
+            payload_sha256 = "30d8f9440d1c0b2d55bf0e7f6914dde3919c70208ef897614def69c0b4c7a200"
+            shape = "bridge_32"
+            [[serializer_experiments.digest_buffers.evidence.measurements]]
+            implementation = "io_stream"
+            median_allocations = 56440.0
+            median_bytes = 2.500888e6
+            median_seconds = 0.012454213000000002
+            observations = 20
+            oracle = "passed"
+            payload_sha256 = "30d8f9440d1c0b2d55bf0e7f6914dde3919c70208ef897614def69c0b4c7a200"
+            shape = "bridge_32"
+            [[serializer_experiments.digest_buffers.evidence.measurements]]
+            implementation = "published"
+            median_allocations = 46.0
+            median_bytes = 2000.0
+            median_seconds = 7.046e-6
+            observations = 20
+            oracle = "passed"
+            payload_sha256 = "026bc8984b4f269194eb59af6e991cb1c3f129d4e1a904e701cc949ea0f39daf"
+            shape = "equation_32"
+            [[serializer_experiments.digest_buffers.evidence.measurements]]
+            implementation = "owned_byte_buffer"
+            median_allocations = 47.0
+            median_bytes = 2032.0
+            median_seconds = 6.934e-6
+            observations = 20
+            oracle = "passed"
+            payload_sha256 = "026bc8984b4f269194eb59af6e991cb1c3f129d4e1a904e701cc949ea0f39daf"
+            shape = "equation_32"
+            [[serializer_experiments.digest_buffers.evidence.measurements]]
+            implementation = "io_stream"
+            median_allocations = 49.0
+            median_bytes = 6168.0
+            median_seconds = 7.1660000000000005e-6
+            observations = 20
+            oracle = "passed"
+            payload_sha256 = "026bc8984b4f269194eb59af6e991cb1c3f129d4e1a904e701cc949ea0f39daf"
+            shape = "equation_32"
+
+    [serializer_experiments.zero_coefficient_filter]
+    reason = "All four representative primitive payload shapes retained the same allocation counts with an extra per-term branch. Full payloads, canonical SHAs and original-domain primitive witnesses matched, but no allocation improvement was qualified."
+    status = "not_selected"
+
+        [serializer_experiments.zero_coefficient_filter.evidence]
+        scope = "Private in-memory zero coefficient filtering prototype with published exact coefficient fold unchanged; every primitive payload field, canonical payload SHA and all original-domain equality witnesses preserved. Complete serialization is measured; bridge construction excluded."
+
+            [[serializer_experiments.zero_coefficient_filter.evidence.measurements]]
+            equalities = 9
+            implementation = "published"
+            median_allocations = 2477.0
+            median_bytes = 154048.0
+            median_seconds = 0.000270452
+            observations = 20
+            oracle = "passed"
+            payload_sha256 = "505f18fa30331a342952ba52e058a49309de2762e78183cfdb9c0de449abbca9"
+            width = 4
+            [[serializer_experiments.zero_coefficient_filter.evidence.measurements]]
+            equalities = 9
+            implementation = "skip_zero_coefficients"
+            median_allocations = 2477.0
+            median_bytes = 153616.0
+            median_seconds = 0.000196335
+            observations = 20
+            oracle = "passed"
+            payload_sha256 = "505f18fa30331a342952ba52e058a49309de2762e78183cfdb9c0de449abbca9"
+            width = 4
+            [[serializer_experiments.zero_coefficient_filter.evidence.measurements]]
+            equalities = 9
+            implementation = "published"
+            median_allocations = 6726.0
+            median_bytes = 427208.0
+            median_seconds = 0.0005397725000000001
+            observations = 20
+            oracle = "passed"
+            payload_sha256 = "ac74d8600278cabcb05e0bfb13a27b085ee1dc141ca13f07e1ca3fecebf599cd"
+            width = 8
+            [[serializer_experiments.zero_coefficient_filter.evidence.measurements]]
+            equalities = 9
+            implementation = "skip_zero_coefficients"
+            median_allocations = 6726.0
+            median_bytes = 427248.0
+            median_seconds = 0.000531284
+            observations = 20
+            oracle = "passed"
+            payload_sha256 = "ac74d8600278cabcb05e0bfb13a27b085ee1dc141ca13f07e1ca3fecebf599cd"
+            width = 8
+            [[serializer_experiments.zero_coefficient_filter.evidence.measurements]]
+            equalities = 9
+            implementation = "published"
+            median_allocations = 24630.0
+            median_bytes = 1.55836e6
+            median_seconds = 0.0018959315000000002
+            observations = 20
+            oracle = "passed"
+            payload_sha256 = "e18e20786da9eab3ea602655c076f6c9bfd869cfbafe8e119f89b706c7f557ec"
+            width = 16
+            [[serializer_experiments.zero_coefficient_filter.evidence.measurements]]
+            equalities = 9
+            implementation = "skip_zero_coefficients"
+            median_allocations = 24630.0
+            median_bytes = 1.55836e6
+            median_seconds = 0.001843446
+            observations = 20
+            oracle = "passed"
+            payload_sha256 = "e18e20786da9eab3ea602655c076f6c9bfd869cfbafe8e119f89b706c7f557ec"
+            width = 16
+            [[serializer_experiments.zero_coefficient_filter.evidence.measurements]]
+            equalities = 9
+            implementation = "published"
+            median_allocations = 94652.0
+            median_bytes = 5.879824e6
+            median_seconds = 0.006880163000000001
+            observations = 20
+            oracle = "passed"
+            payload_sha256 = "30d8f9440d1c0b2d55bf0e7f6914dde3919c70208ef897614def69c0b4c7a200"
+            width = 32
+            [[serializer_experiments.zero_coefficient_filter.evidence.measurements]]
+            equalities = 9
+            implementation = "skip_zero_coefficients"
+            median_allocations = 94652.0
+            median_bytes = 5.880032e6
+            median_seconds = 0.007096956000000001
+            observations = 20
+            oracle = "passed"
+            payload_sha256 = "30d8f9440d1c0b2d55bf0e7f6914dde3919c70208ef897614def69c0b4c7a200"
+            width = 32
 
 [source_hashes]
 "src/XCSP3Bridges.jl" = "40950c934a52f8e65e7a93e0b31f2e160b102c2222584beb7849bcb1865f0756"
