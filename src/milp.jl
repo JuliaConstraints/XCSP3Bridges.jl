@@ -6,6 +6,37 @@ function exact_float(value::Integer)
 end
 integer_string(value::Float64) = string(BigInt(value))
 
+# Prove uniqueness before bypassing reduction. Count zeros separately so a
+# sparse or empty result never retains the full input row's buffer capacity.
+function _ordered_nonzero_term_count(terms)
+    count=0
+    for i in eachindex(terms)
+        i>1 && terms[i-1].variable.value>=terms[i].variable.value && return -1
+        count+=!iszero(terms[i].coefficient)
+    end
+    count
+end
+function _integral_payload_terms(terms)
+    count=_ordered_nonzero_term_count(terms)
+    if count>=0
+        result=Dict{String,Any}[]
+        sizehint!(result,count)
+        for term in terms
+            value=BigInt(term.coefficient)
+            iszero(value) || push!(result,Dict("variable"=>term.variable.value,"coefficient"=>string(value)))
+        end
+        return result
+    end
+    coefficients=Dict{Int,BigInt}()
+    for term in terms
+        index=term.variable.value
+        value=BigInt(term.coefficient)
+        coefficients[index]=haskey(coefficients,index) ? coefficients[index]+value : value
+    end
+    [Dict("variable"=>i,"coefficient"=>string(coefficients[i]))
+        for i in sort!(collect(keys(coefficients))) if !iszero(coefficients[i])]
+end
+
 "Register the existing CPE finite-domain and local-relation bridges."
 function add_bridges!(model)
     MOI.Bridges.add_bridge(model, CPE.Bridges.Domain2MILPBridge{Float64})
@@ -114,14 +145,7 @@ function bridge_payload(bridge)
             for c in MOI.get(bridge.linear, MOI.ListOfConstraintIndices{F,S}())
                 f = MOI.get(bridge.linear, MOI.ConstraintFunction(), c)
                 s = MOI.get(bridge.linear, MOI.ConstraintSet(), c)
-                coefficients = Dict{Int,BigInt}()
-                for term in f.terms
-                    index = term.variable.value
-                    value = BigInt(term.coefficient)
-                    coefficients[index] = haskey(coefficients, index) ? coefficients[index] + value : value
-                end
-                terms = [Dict("variable"=>i, "coefficient"=>string(coefficients[i]))
-                    for i in sort!(collect(keys(coefficients))) if !iszero(coefficients[i])]
+                terms = _integral_payload_terms(f.terms)
                 push!(equalities, Dict("terms"=>terms, "constant"=>integer_string(f.constant),
                     "rhs"=>integer_string(s.value)))
             end

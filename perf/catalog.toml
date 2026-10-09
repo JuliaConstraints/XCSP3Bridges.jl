@@ -3,9 +3,21 @@ schema_version = "perfchecker-scenario-catalog/1"
 
 [[scenarios]]
 collectors = ["benchmark", "chairmark", "profile", "profile_alloc"]
+factory = "milp_raw_payload_case"
+id = "milp_raw_payload_terms_16"
+implementation = "owned-ordered-exact-terms-v3"
+repeatable = true
+requirements = ["XCSP3Bridges", "MathOptInterface"]
+source = "scenarios.jl"
+
+    [scenarios.parameters]
+    terms = 16
+
+[[scenarios]]
+collectors = ["benchmark", "chairmark", "profile", "profile_alloc"]
 factory = "milp_payload_case"
 id = "milp_payload_width_8"
-implementation = "cached-digests-owned-coefficient-fold-v2"
+implementation = "cached-digests-owned-ordered-exact-terms-v3"
 repeatable = true
 requirements = ["XCSP3Bridges", "MathOptInterface"]
 source = "scenarios.jl"
@@ -17,7 +29,7 @@ source = "scenarios.jl"
 collectors = ["benchmark", "chairmark", "profile", "profile_alloc"]
 factory = "milp_payload_case"
 id = "milp_payload_width_16"
-implementation = "cached-digests-owned-coefficient-fold-v2"
+implementation = "cached-digests-owned-ordered-exact-terms-v3"
 repeatable = true
 requirements = ["XCSP3Bridges", "MathOptInterface"]
 source = "scenarios.jl"

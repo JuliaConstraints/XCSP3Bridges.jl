@@ -209,6 +209,61 @@ end
         @test_throws ErrorException XB.bridge_payload(as_bridge(unsupported))
     end
 
+
+    @testset "Sorted and raw exact primitive terms" begin
+        fixtures=Module(:RawPrimitivePayloadFixtures)
+        Base.include(fixtures,joinpath(@__DIR__,"..","perf","scenarios.jl"))
+        for n in (0,1,2,8,16,64)
+            case=Base.invokelatest(fixtures.milp_raw_payload_case,Dict("terms"=>n))
+            state=Base.invokelatest(case.prepare)
+            payload=Base.invokelatest(case.operation,state)
+            @test Base.invokelatest(case.verify,state,payload)
+            repeated=Base.invokelatest(case.operation,state)
+            @test repeated==payload && XB.payload_digest(repeated)==XB.payload_digest(payload)
+            @test repeated["equalities"]!==payload["equalities"]
+            @test only(repeated["equalities"])["terms"]!==only(payload["equalities"])["terms"]
+        end
+        for n in (0,1,2,8,16,64,256),shape in (:sorted,:reverse,:repeated,:zeros,:sparse)
+            indices=shape===:repeated ? fill(1,n) : collect(1:n)
+            coefficients=shape===:zeros ? zeros(Float64,n) :
+                shape===:sparse ? [mod(i,16)==0 ? 1.0 : 0.0 for i in 1:n] :
+                Float64[mod(i,7)-3 for i in 1:n]
+            terms=[MOI.ScalarAffineTerm(c,MOI.VariableIndex(i)) for (i,c) in zip(indices,coefficients)]
+            shape===:reverse && reverse!(terms)
+            before=copy(terms)
+            output=XB._integral_payload_terms(terms)
+            keys=[term["variable"] for term in output]
+            @test issorted(keys) && allunique(keys)
+            @test all(term->!iszero(parse(BigInt,term["coefficient"])),output)
+            @test terms==before
+            for pattern in (i->0,i->1,i->isodd(i) ? -2 : 3)
+                original=sum(BigInt(term.coefficient)*pattern(term.variable.value) for term in terms;init=big(0))
+                emitted=sum(parse(BigInt,term["coefficient"])*pattern(term["variable"]) for term in output;init=big(0))
+                @test original==emitted
+            end
+            again=XB._integral_payload_terms(terms)
+            @test output==again && output!==again
+            if !isempty(output)
+                output[1]["coefficient"]="999"
+                @test terms==before && XB._integral_payload_terms(terms)==again
+            end
+            if shape===:zeros
+                @test Base.summarysize(output)==Base.summarysize(Dict{String,Any}[])
+            end
+        end
+        for coefficients in ((2.0^53,1.0,-2.0^53),(0.0,-2.0^53,2.0^53),
+                (-2.0^53,-1.0,2.0^53))
+            terms=[MOI.ScalarAffineTerm(c,MOI.VariableIndex(1)) for c in coefficients]
+            result=XB._integral_payload_terms(terms)
+            value=sum(BigInt(c) for c in coefficients;init=big(0))
+            @test isempty(result) ? iszero(value) : only(result)["coefficient"]==string(value)
+        end
+        for value in (0.5,-0.5,NaN,Inf,-Inf),indices in ([1,2],[2,1],[1,1])
+            terms=[MOI.ScalarAffineTerm(1.0,MOI.VariableIndex(indices[1])),
+                MOI.ScalarAffineTerm(value,MOI.VariableIndex(indices[2]))]
+            @test_throws InexactError XB._integral_payload_terms(terms)
+        end
+    end
     @testset "Exact owned primitive coefficient reduction" begin
         for leading in (0.0, -2.0, 2.0, -2.0^53, 2.0^53)
             linear=MOI.Utilities.Model{Float64}();v=MOI.add_variables(linear,3)

@@ -2,6 +2,50 @@ import XCSP3Bridges as XB
 import QUBOConstraints as QC
 import MathOptInterface as MOI
 
+# Preserve raw order/duplicates for serializer qualification; the standard
+# Utilities.Model canonicalizes functions before returning them.
+struct RawPayloadFixtureModel
+    inner::MOI.Utilities.Model{Float64}
+    raw::MOI.ScalarAffineFunction{Float64}
+end
+MOI.get(model::RawPayloadFixtureModel,attribute,args...)=MOI.get(model.inner,attribute,args...)
+MOI.get(model::RawPayloadFixtureModel,::MOI.ConstraintFunction,
+    ::MOI.ConstraintIndex{MOI.ScalarAffineFunction{Float64},MOI.EqualTo{Float64}})=
+    MOI.ScalarAffineFunction(copy(model.raw.terms),model.raw.constant)
+
+"Serialize an unordered raw row against its original exact polynomial."
+function milp_raw_payload_case(parameters)
+    count=get(parameters,"terms",16)
+    count>=0 || throw(ArgumentError("nonnegative raw fixture size required"))
+    linear=MOI.Utilities.Model{Float64}()
+    variables=MOI.add_variables(linear,3)
+    terms=[MOI.ScalarAffineTerm(Float64(mod(i,7)-3),variables[mod(i,3)+1]) for i in 1:count]
+    append!(terms,[MOI.ScalarAffineTerm(2.0^53,variables[2]),
+        MOI.ScalarAffineTerm(1.0,variables[2]),MOI.ScalarAffineTerm(-2.0^53,variables[2])])
+    raw=MOI.ScalarAffineFunction(copy(terms),-7.0)
+    MOI.add_constraint(linear,MOI.ScalarAffineFunction(copy(terms),-7.0),MOI.EqualTo(11.0))
+    model=RawPayloadFixtureModel(linear,raw)
+    state=(;linear=model,sources=[1,2],root=3,domain_relations=0,operation_relations=0)
+    prepare=()->state
+    operation=state->XB.bridge_payload(state)
+    verify=(state,payload)->begin
+        row=only(payload["equalities"])
+        row["constant"]=="-7" && row["rhs"]=="11" || return false
+        indices=[term["variable"] for term in row["terms"]]
+        issorted(indices) && allunique(indices) || return false
+        all(term->!iszero(parse(BigInt,term["coefficient"])),row["terms"]) || return false
+        for a in -2:2,b in -2:2,c in -2:2
+            values=(a,b,c)
+            original=BigInt(-7)+sum(BigInt(term.coefficient)*values[term.variable.value] for term in raw.terms;init=big(0))
+            emitted=parse(BigInt,row["constant"])+sum(parse(BigInt,term["coefficient"])*values[term["variable"]]
+                for term in row["terms"];init=big(0))
+            original==emitted || return false
+        end
+        raw.terms==terms && raw.constant==-7.0
+    end
+    (;prepare,operation,verify)
+end
+
 "Exhaustive original-domain witnesses derived from the emitted primitive equations."
 function primitive_equality_oracle(payload, width)
     binary = Set(payload["binary_variables"])
