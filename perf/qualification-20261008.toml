@@ -14,7 +14,7 @@ perfchecker = "1.0.0"
 precompile_tasks = 1
 profile_semantics = "CPU samples and allocation events are separate. Allocation byte/count totals are independent operation measurements; sampled stacks are not used to infer those totals."
 qualification = "Operation and preparation scopes are explicit. All observations use owned state and independent oracles. Concurrent overnight tasks were active; timings are operational comparisons, not controlled scaling. Allocation counts describe Julia-managed operation allocations; native solver and whole-process memory are separate."
-recorded_utc = "2026-10-09T00:23:55.182"
+recorded_utc = "2026-10-09T00:31:03.728"
 remaining_hotspots = ["Authoritative exact atomic-plan validation, owned MOI models and local relation tables retain necessary construction allocations.", "Canonical payload serialization still allocates owned term dictionaries, exact BigInt conversions and unordered-row reductions, decimal coefficient strings, TOML buffers and one SHA digest per equation.", "JET and AllocCheck findings remain advisory static reports; they include generic MOI paths, exact arithmetic, serialization and intentional result ownership. Phase-specific native counts are recorded.", "Native solver and whole-process memory are outside Julia-managed operation byte/count observations. Timings are bounded operational measurements under concurrent overnight activity."]
 schema = "qualified-performance-increment/1"
 unavailable = ["Linux perf counters denied by perf_event_paranoid=4; kernel policy unchanged."]
@@ -6883,6 +6883,7 @@ status = "complete"
 baseline_commit = "247a78f13e09d587d9ffa73f9744a11f22f3f630"
 claims = "All five normal widths 2/4/8/16/32 preserve every payload field, canonical SHA and original-domain primitive witness. Width 16: 1558368 bytes/24630 allocations become 1450808/24475. Width 32: 5879856/94652 becomes 5511304/94471. All 43 raw-row shapes retain equal or smaller payload and term-buffer storage; the unordered/repeated fallback retains one additional 32-byte array-wrapper allocation. No universal allocation-count, byte or timing reduction is claimed."
 profile_semantics = "One profiled operation; count and byte totals are separate evaluations and profiler events do not replace allocation measurements. Retained size controls cover GC-managed objects rather than native allocator memory. Heap identity, size and redaction are verified before removal."
+qualified_commit_reference = "d75ff665aa2840c5ce8db5fec7ee593f89b8df4b"
 quality = "894/894 bridge assertions plus default Aqua passed. Added 315 assertions independently evaluate original exact affine polynomials for sorted/reversed/repeated/zero-heavy rows, preserve input and output ownership, check +2^53/1/-2^53 cancellation and fractional/nonfinite conversion failures. A new raw MOI getter adapter preserves noncanonical term order/duplicates/zeros that the ordinary Utilities.Model otherwise canonicalizes; its complete payload oracle covers all 125 assignments in -2:2 cubed. Five native scenarios include this raw fallback, two ordinary payloads and two complete model constructions, with all four collectors/eight analyzers and one verified removed redacted heap."
 remaining_findings = "Exact arithmetic, owned dictionaries/strings, generic MOI paths and canonical TOML/SHA serialization still allocate. Payload JET remains at 47 findings; AllocCheck reports 822 for ordinary payloads and 818 for the raw fallback. Complete construction remains at 211 JET/316 AllocCheck findings. These are advisory phase-specific evidence rather than allocation measurements. The ordinary bridge path saves transient dictionaries; the raw fallback preserves exact behavior and records its small constant allocation increase explicitly."
 scope = "Complete public primitive payload serialization. A fresh per-row check proves strictly ascending variable indices, which implies uniqueness; only those rows bypass their unnecessary coefficient dictionary and key sorting. Nonzero count sizes the output without retaining zero-term capacity. Every Float64 coefficient still undergoes the original exact BigInt conversion, including fractional/nonfinite error behavior. All unordered/repeated rows retain the original exact reduction and zero cancellation. MOI getters, canonical digest ordering, source/root/relation metadata and bridge construction guards are unchanged."
@@ -11864,6 +11865,220 @@ baseline_commit = "ba09e43c9fe57eb6163ae6af9e4523383bf5ed23"
             oracle = "passed"
             payload_sha256 = "026bc8984b4f269194eb59af6e991cb1c3f129d4e1a904e701cc949ea0f39daf"
             shape = "equation_32"
+
+    [serializer_experiments.fixed_primitive_queries]
+    baseline_commit = "d75ff665aa2840c5ce8db5fec7ee593f89b8df4b"
+    reason = "Replacing dynamic attribute type parameters with the statically known supported primitive types preserves all payloads/digests/oracles but changes no allocation counts in five ordinary and five raw shapes. Direct advisory JET/AllocCheck counts also remain 47/822 for the ordinary payload and 47/818 for the raw payload. No meaningful improvement is qualified, so source remains unchanged."
+    status = "not_selected"
+
+        [serializer_experiments.fixed_primitive_queries.advisory_analyzers]
+        scope = "Direct advisory JET/AllocCheck operation comparison after private prototype definition; fresh-world phase entry, not an isolated native worker qualification. Source files unchanged."
+
+            [[serializer_experiments.fixed_primitive_queries.advisory_analyzers.analyzers]]
+            alloccheck_findings = 822
+            case = "milp_payload_case"
+            implementation = "published_d75ff66"
+            jet_findings = 47
+            [[serializer_experiments.fixed_primitive_queries.advisory_analyzers.analyzers]]
+            alloccheck_findings = 822
+            case = "milp_payload_case"
+            implementation = "fixed_primitive_queries"
+            jet_findings = 47
+            [[serializer_experiments.fixed_primitive_queries.advisory_analyzers.analyzers]]
+            alloccheck_findings = 818
+            case = "milp_raw_payload_case"
+            implementation = "published_d75ff66"
+            jet_findings = 47
+            [[serializer_experiments.fixed_primitive_queries.advisory_analyzers.analyzers]]
+            alloccheck_findings = 818
+            case = "milp_raw_payload_case"
+            implementation = "fixed_primitive_queries"
+            jet_findings = 47
+
+        [serializer_experiments.fixed_primitive_queries.evidence]
+        baseline_commit = "d75ff665aa2840c5ce8db5fec7ee593f89b8df4b"
+        scope = "Complete public payload versus otherwise identical private payload using the statically known MOI index attributes inside the existing exact supported-type branches. No branch order, unsupported-type guard, getter call, coefficient conversion or canonical ordering changes. Normal primitive witnesses and raw original polynomials/payload digests match."
+
+            [[serializer_experiments.fixed_primitive_queries.evidence.measurements]]
+            digest = "ee0f01d7ae5ee66fda6ecb676c043b3efe2878f5a2296e3d9663bc3b505b8cb0"
+            implementation = "published_d75ff66"
+            median_allocations = 1245.0
+            median_bytes = 70624.0
+            median_seconds = 0.000178077
+            observations = 20
+            oracle = "passed"
+            width = 2
+            [[serializer_experiments.fixed_primitive_queries.evidence.measurements]]
+            digest = "ee0f01d7ae5ee66fda6ecb676c043b3efe2878f5a2296e3d9663bc3b505b8cb0"
+            implementation = "fixed_primitive_queries"
+            median_allocations = 1245.0
+            median_bytes = 70664.0
+            median_seconds = 0.0001042125
+            observations = 20
+            oracle = "passed"
+            width = 2
+            [[serializer_experiments.fixed_primitive_queries.evidence.measurements]]
+            digest = "505f18fa30331a342952ba52e058a49309de2762e78183cfdb9c0de449abbca9"
+            implementation = "published_d75ff66"
+            median_allocations = 2394.0
+            median_bytes = 143360.0
+            median_seconds = 0.00019011850000000003
+            observations = 20
+            oracle = "passed"
+            width = 4
+            [[serializer_experiments.fixed_primitive_queries.evidence.measurements]]
+            digest = "505f18fa30331a342952ba52e058a49309de2762e78183cfdb9c0de449abbca9"
+            implementation = "fixed_primitive_queries"
+            median_allocations = 2394.0
+            median_bytes = 143360.0
+            median_seconds = 0.000193476
+            observations = 20
+            oracle = "passed"
+            width = 4
+            [[serializer_experiments.fixed_primitive_queries.evidence.measurements]]
+            digest = "ac74d8600278cabcb05e0bfb13a27b085ee1dc141ca13f07e1ca3fecebf599cd"
+            implementation = "published_d75ff66"
+            median_allocations = 6613.0
+            median_bytes = 397424.0
+            median_seconds = 0.0005199295000000001
+            observations = 20
+            oracle = "passed"
+            width = 8
+            [[serializer_experiments.fixed_primitive_queries.evidence.measurements]]
+            digest = "ac74d8600278cabcb05e0bfb13a27b085ee1dc141ca13f07e1ca3fecebf599cd"
+            implementation = "fixed_primitive_queries"
+            median_allocations = 6613.0
+            median_bytes = 397440.0
+            median_seconds = 0.000519613
+            observations = 20
+            oracle = "passed"
+            width = 8
+            [[serializer_experiments.fixed_primitive_queries.evidence.measurements]]
+            digest = "e18e20786da9eab3ea602655c076f6c9bfd869cfbafe8e119f89b706c7f557ec"
+            implementation = "published_d75ff66"
+            median_allocations = 24475.0
+            median_bytes = 1.450808e6
+            median_seconds = 0.0018558840000000001
+            observations = 20
+            oracle = "passed"
+            width = 16
+            [[serializer_experiments.fixed_primitive_queries.evidence.measurements]]
+            digest = "e18e20786da9eab3ea602655c076f6c9bfd869cfbafe8e119f89b706c7f557ec"
+            implementation = "fixed_primitive_queries"
+            median_allocations = 24475.0
+            median_bytes = 1.450808e6
+            median_seconds = 0.0018194550000000002
+            observations = 20
+            oracle = "passed"
+            width = 16
+            [[serializer_experiments.fixed_primitive_queries.evidence.measurements]]
+            digest = "30d8f9440d1c0b2d55bf0e7f6914dde3919c70208ef897614def69c0b4c7a200"
+            implementation = "published_d75ff66"
+            median_allocations = 94471.0
+            median_bytes = 5.510944e6
+            median_seconds = 0.006914307000000001
+            observations = 20
+            oracle = "passed"
+            width = 32
+            [[serializer_experiments.fixed_primitive_queries.evidence.measurements]]
+            digest = "30d8f9440d1c0b2d55bf0e7f6914dde3919c70208ef897614def69c0b4c7a200"
+            implementation = "fixed_primitive_queries"
+            median_allocations = 94471.0
+            median_bytes = 5.511032e6
+            median_seconds = 0.0068620485000000005
+            observations = 20
+            oracle = "passed"
+            width = 32
+            [[serializer_experiments.fixed_primitive_queries.evidence.measurements]]
+            digest = "ff5b36e4fd761c81f7082a51efbaf02753c6bf88e8fb47811ff2c60551b113a4"
+            implementation = "published_d75ff66"
+            median_allocations = 116.0
+            median_bytes = 7512.0
+            median_seconds = 3.4870000000000002e-6
+            observations = 20
+            oracle = "passed"
+            raw_terms = 0
+            [[serializer_experiments.fixed_primitive_queries.evidence.measurements]]
+            digest = "ff5b36e4fd761c81f7082a51efbaf02753c6bf88e8fb47811ff2c60551b113a4"
+            implementation = "fixed_primitive_queries"
+            median_allocations = 116.0
+            median_bytes = 7512.0
+            median_seconds = 3.304e-6
+            observations = 20
+            oracle = "passed"
+            raw_terms = 0
+            [[serializer_experiments.fixed_primitive_queries.evidence.measurements]]
+            digest = "4f9fd3271f4ef2ba53f135fe84f1881d7e01effe3b2d25921a47e53a440af37b"
+            implementation = "published_d75ff66"
+            median_allocations = 120.0
+            median_bytes = 7640.0
+            median_seconds = 3.1315000000000004e-6
+            observations = 20
+            oracle = "passed"
+            raw_terms = 1
+            [[serializer_experiments.fixed_primitive_queries.evidence.measurements]]
+            digest = "4f9fd3271f4ef2ba53f135fe84f1881d7e01effe3b2d25921a47e53a440af37b"
+            implementation = "fixed_primitive_queries"
+            median_allocations = 120.0
+            median_bytes = 7640.0
+            median_seconds = 3.3595e-6
+            observations = 20
+            oracle = "passed"
+            raw_terms = 1
+            [[serializer_experiments.fixed_primitive_queries.evidence.measurements]]
+            digest = "f671fa7243a0fb733d65aae80059c300d1ab025e316b1173ae98c47525d236aa"
+            implementation = "published_d75ff66"
+            median_allocations = 134.0
+            median_bytes = 8768.0
+            median_seconds = 4.0540000000000005e-6
+            observations = 20
+            oracle = "passed"
+            raw_terms = 2
+            [[serializer_experiments.fixed_primitive_queries.evidence.measurements]]
+            digest = "f671fa7243a0fb733d65aae80059c300d1ab025e316b1173ae98c47525d236aa"
+            implementation = "fixed_primitive_queries"
+            median_allocations = 134.0
+            median_bytes = 8768.0
+            median_seconds = 3.846e-6
+            observations = 20
+            oracle = "passed"
+            raw_terms = 2
+            [[serializer_experiments.fixed_primitive_queries.evidence.measurements]]
+            digest = "0fa032cf5da8b81bf4d07e79706edebbb2ca67d7320a0b3b2faa7aa6f0fbbfff"
+            implementation = "published_d75ff66"
+            median_allocations = 200.0
+            median_bytes = 11544.0
+            median_seconds = 6.6955000000000005e-6
+            observations = 20
+            oracle = "passed"
+            raw_terms = 16
+            [[serializer_experiments.fixed_primitive_queries.evidence.measurements]]
+            digest = "0fa032cf5da8b81bf4d07e79706edebbb2ca67d7320a0b3b2faa7aa6f0fbbfff"
+            implementation = "fixed_primitive_queries"
+            median_allocations = 200.0
+            median_bytes = 11544.0
+            median_seconds = 5.479500000000001e-6
+            observations = 20
+            oracle = "passed"
+            raw_terms = 16
+            [[serializer_experiments.fixed_primitive_queries.evidence.measurements]]
+            digest = "4f9fd3271f4ef2ba53f135fe84f1881d7e01effe3b2d25921a47e53a440af37b"
+            implementation = "published_d75ff66"
+            median_allocations = 368.0
+            median_bytes = 15672.0
+            median_seconds = 9.756e-6
+            observations = 20
+            oracle = "passed"
+            raw_terms = 64
+            [[serializer_experiments.fixed_primitive_queries.evidence.measurements]]
+            digest = "4f9fd3271f4ef2ba53f135fe84f1881d7e01effe3b2d25921a47e53a440af37b"
+            implementation = "fixed_primitive_queries"
+            median_allocations = 368.0
+            median_bytes = 15672.0
+            median_seconds = 1.1509000000000001e-5
+            observations = 20
+            oracle = "passed"
+            raw_terms = 64
 
     [serializer_experiments.raw_length_stream_buffers]
     reason = "The first sorted-row stream reserved output capacity from raw input length. A 4096-term unique all-zero row increased retained payload size from 1447 to 34215 bytes despite preserving the payload/digest. The selected version counts nonzero coefficients first and restores retained size to 1447."
